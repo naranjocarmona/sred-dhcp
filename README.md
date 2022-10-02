@@ -73,6 +73,11 @@ Para ello, vamos a ejecutar una maquina virtual con Windows XP.
 
 > Nota: La instalacion y configuracion del servidor DHCP se ha realizado en una maquina virtual con Debian.
 
+> Nota: Si vemos un error parecido al siguiente, significa que falta un punto y coma (semicolon) en la línea indicada.
+```
+Oct  2 18:53:18 debian isc-dhcp-server[25084]: /etc/dhcp/dhcpd.conf line 10: semicolon expected.
+```
+
 En Virtual Box, se configuran las tarjetas de red de ambas maquinas como redes internas y en Avanzado, le damos a permitir todo.
 
 ![](capturas/configuracionRedInterna.png)
@@ -90,6 +95,8 @@ Iniciamos la maquina de Windows XP y vemos que el servidor le asigna una IP del 
 En el log de Debian podemos ver lo siguiente:
 
 ![](capturas/vistaLogFinal.png)
+
+
 
 
 ## Referencias
