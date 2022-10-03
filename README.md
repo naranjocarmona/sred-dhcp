@@ -62,7 +62,7 @@ Aqui configuraremos todo lo descomentado, recordando que el rango de IPs que vay
 Finalmente reiniciamos el servidor para confirmar los cambios
 
 ```bash
-service isc-dhcp-server restart
+systemctl restart isc-dhcp-server
 ```
 
 ## Comprobacion
@@ -95,6 +95,91 @@ Iniciamos la maquina de Windows XP y vemos que el servidor le asigna una IP del 
 En el log de Debian podemos ver lo siguiente:
 
 ![](capturas/vistaLogFinal.png)
+
+
+# Configuración DHCP en Debian con dos tarjetas y dos subredes.
+
+## Configuracion
+
+Para cofigurarlo, primero le damos una ip estatica a la nueva tarjeta de red del servidor desde 
+
+```bash
+nano /etc/network/interfaces
+```
+
+![](capturas/IPsFijas.png)
+
+Despues añadimos el nombre de la segunda tarjeta de red al archivo de configuracion
+
+```bash
+nano nano /etc/default/isc-dhcp-server
+```
+
+![](capturas/configuracionNombreTarjetas.png)
+
+Luego accedemos al archivo de configuracion
+
+```bash
+nano /etc/dhcp/dhcpd.conf
+```
+
+y añadimos una nueva subred distinta a la anterior
+
+
+![](capturas/ConfDhcpRangos.png)
+
+A continuacion, reiniciamos
+
+```bash
+systemctl restart isc-dhcp-server
+```
+
+## Comprobacion
+
+Para comprobarlo, creamos una nueva tarjeta de red en la maquina cliente con la opcion "red interna".
+Le adjudicamos un nombre de adaptador de red que concida con el nombrado en uno de los adaptadores de red del servidor, y a continuacion iniciamos la maquina.
+
+Veremos que el log del servidor recogerá como el servidor dhcp adjudica las ip a las tarjetas de red de la maquina cliente
+
+
+![](capturas/logDHCPDando2IPs.png)
+
+Finalmente, visualizamos que las tarjertas de red de la maquina cliente han reciido las ip de las dos subredes definidas.
+
+![](capturas/windowsXPCliente2IPs.png)
+
+# Configuración de una ip fija a traves de una MAC.
+
+## Configuracion
+
+En la maquina cliente añadimos una nueva tarjeta de red (de manera red interna), preguntamos por la ip en el cmd, y copiamos la MAC de esa nueva tarjeta de red.
+
+Despues, en el servidor, modificamos el archivo de configuracion
+
+```bash
+nano /etc/dhcp/dhcpd.conf
+```
+
+Aqui, modificamos la parte indicada en la captura siguiente, dandole un nombre al host para distinguir a qué le vas a dar esa ip fija, y pegamos la MAC copiada anteriormente en el lugar indicado.
+
+![](capturas/confIPFijaPorMAC.png)
+
+Reiniciamos
+
+```bash
+systemctl restart isc-dhcp-server
+```
+
+Miramos el log del servidor y vemos que se adjudica la ip a la MAC indicada.
+
+![](capturas/syslogIPFijaPorMAC.png)
+
+
+Finalmente, volvemos a la maquina cliente, y vemos que esa nueva tarjeta de red ha obtenido la ip fija a traves de su MAC.
+
+![](capturas/windowsXPCliente2IPs.png)
+
+
 
 
 
