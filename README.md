@@ -177,7 +177,7 @@ Miramos el log del servidor y vemos que se adjudica la ip a la MAC indicada.
 
 Finalmente, volvemos a la maquina cliente, y vemos que esa nueva tarjeta de red ha obtenido la ip fija a traves de su MAC.
 
-![](capturas/windowsXPCliente2IPs.png)
+![](capturas/winxpIPFijaPorMAC.png)
 
 
 
