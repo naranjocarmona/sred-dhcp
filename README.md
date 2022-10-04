@@ -304,6 +304,9 @@ ipconfig /renew
 
 Si volvemos a hacer un `ipconfig /all`, deberíamos ver que todas las IPs asignadas han sido mediante la máquina `192.168.0.131`.
 
+![](capturas/ipsSecondary.png)
+
+
 ## Referencias
 
 * [Blog Jesus](https://jesusfernandeztoledo.com/configurar-servidor-dhcp-en-debian-ubuntu/)
