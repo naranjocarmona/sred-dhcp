@@ -1,3 +1,11 @@
+# Información sobre MV y versión de SO
+## Debian
+![](capturas/datosDebian.png)
+
+## VirtualBox
+![](capturas/datosVirtualbox.png)
+
+
 # Configuración DHCP en Debian
 
 ## Instalacion del Servidor
@@ -148,6 +156,22 @@ Finalmente, visualizamos que las tarjertas de red de la maquina cliente han reci
 
 ![](capturas/windowsXPCliente2IPs.png)
 
+## Información sobre Red Interna, Red NAT y sus diferencias.
+
+Es red interna es un modo de configuración que nos permite crear una red local de dos o más máquinas virtuales, donde dos o más VM que tengamos configuradas se puedan comunicar entre sí sin problemas.
+
+
+Una red NAT es una red que creará VirtualBox que permite compartir dicha red con varias máquinas virtuales de este sistema anfitrión. Además, proporciona una puerta de enlace con salida a Internet en la dirección de host número 1 de la red.
+
+Diferencias entre las dos redes:
+- la red interna solo permite ver maquinas virtuales que hemos dicho se conectan a ella,
+- la red interna la utilizaremos cuando deseemos que las maquinas este aisladas.
+- La red interna no tiene DHCP, asi que la configuración en las maquinas deberá de ser manual o una de ellas comportarse como DHCP.
+- La red NAT permite varias maquinas en la misma red. 
+
+![](capturas/diferenciasRedes.png)
+
+
 # Configuración de una ip fija a traves de una MAC.
 
 ## Configuracion
@@ -180,12 +204,109 @@ Finalmente, volvemos a la maquina cliente, y vemos que esa nueva tarjeta de red 
 ![](capturas/winxpIPFijaPorMAC.png)
 
 
+# Configuración de FAILOVER
+FAILOVER es una funcionalidad para configurar más de un servidor DNS. Si uno falla, otros responden.
+Todos tienen que pertenecer a la misma red, así que para la práctica usaremos **una única tarjeta de red** en cada servidor DHCP (máquina debian) y configuramos las IPs para que sean de la misma red.
 
+## Configuración de la máquina primaria
+Dejamos una sola tarjeta de red en debian con la IP `192.168.0.31`. Modificamos el archivo dhcpd.conf de la siguiente manera:
 
+```bash
+authoritative; # Descomentamos esta línea
 
+# Declarar failover
+failover peer "FAILOVER" {
+  primary;
+  address 192.168.0.31; # Esta IP es la del servidor primario
+  port 647;
+  peer address 192.168.0.131; # Esta IP es la del servidor secundario
+  peer port 647;
+  max-unacked-updates 10;
+  max-response-delay 30;
+  load balance max seconds 3;
+  mclt 1800;
+  split 128;
+}
+
+# Modificamos la configuración de subred y metemos el rango
+# de IPs en un pool.
+subnet 192.168.0.0 netmask 255.255.255.0 {
+#   range 192.168.0.50 192.168.0.100;
+  option broadcast-address 192.168.0.255;
+  option routers 192.168.0.1;
+  option domain-name-servers 8.8.8.8, 8.8.4.4;
+  pool {
+    failover peer "FAILOVER";
+    max-lease-time 3600;
+    range 192.168.0.50 192.168.0.100;
+  }
+}
+
+```
+
+## Configuración de la máquina secundaria
+Dejamos una sola tarjeta de red en debian con la IP `192.168.0.131`. Modificamos el archivo dhcpd.conf de la siguiente manera:
+
+```bash
+authoritative; # Descomentamos esta línea
+
+# Declarar failover
+failover peer "FAILOVER" {
+  secondary;
+  address 192.168.0.131; # Esta IP es la del servidor secundario
+  port 647;
+  peer address 192.168.0.31; # Esta IP es la del servidor primario
+  peer port 647;
+  max-unacked-updates 10;
+  max-response-delay 30;
+  load balance max seconds 3;
+  mclt 1800;
+  split 128;
+}
+
+# Modificamos la configuración de subred y metemos el rango
+# de IPs en un pool.
+subnet 192.168.0.0 netmask 255.255.255.0 {
+#   range 192.168.0.50 192.168.0.100;
+  option broadcast-address 192.168.0.255;
+  option routers 192.168.0.1;
+  option domain-name-servers 8.8.8.8, 8.8.4.4;
+  pool {
+    failover peer "FAILOVER";
+    max-lease-time 3600;
+    range 192.168.0.50 192.168.0.100;
+  }
+}
+
+```
+
+Reiniciamos el servicio `isc-dhcp-server.service` en ambas máquinas.
+```bash
+systemctl restart isc-dhcp-server.service
+```
+
+## Comprobación con máquina cliente (Windows XP)
+Iniciamos la máquina cliente y vemos que los servidores DHCP le dan IPs del rango.
+Si ejecutamos un `ipconfig /all`, podemos ver desde qué servidor DHCP se ha establecido la IP.
+
+Para comprobar que la configuración del FAILOVER funciona, vamos a parar un servicio DHCP en una de las máquinas debian, por ejemplo en la `192.168.0.31`
+```bash
+systemctl stop isc-dhcp-server.service
+```
+
+Ahora, para renovar las IPs dadas por DHCP en Windows, abrimos una CMD y hacemos
+```
+ipconfig /release
+ipconfig /renew
+```
+
+> Nota: Se hace antes un release para poner todas las IPs a cero. Luego un renew para que se aplique la configuración DHCP de nuevo.
+
+Si volvemos a hacer un `ipconfig /all`, deberíamos ver que todas las IPs asignadas han sido mediante la máquina `192.168.0.131`.
 
 ## Referencias
 
 * [Blog Jesus](https://jesusfernandeztoledo.com/configurar-servidor-dhcp-en-debian-ubuntu/)
 * [IES Mar de Cadiz](https://www.fpgenred.es/DHCP/index.html)
+* [DANITIC](https://danitic.wordpress.com/2018/10/24/diferencias-entre-nat-red-nat-adaptador-puente-internal-y-solo-anfitrion-en-virtualbox/)
 
