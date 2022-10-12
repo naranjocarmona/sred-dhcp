@@ -306,10 +306,60 @@ Si volvemos a hacer un `ipconfig /all`, deberíamos ver que todas las IPs asigna
 
 ![](capturas/ipsSecondary.png)
 
+# Configuración de servidor relay
+
+## Configuración de las máquinas
+
+Lo primero que hacemos es configurar crear 3 máquinas virtuales. Una con una tarjeta de red que hará de servidor, otra como cliente con una tarjeta de red, y otra que hará como servidor relay que contendrá 2 tarjetas de red.
+Todo funcionará mediante un red interna.
+
+Configuramos la máquina relay y le adjudicamos un rango de ip de la red del cliente, así, cuando la maquina cliente pida su ip, ésta podrá proporcionarsela.
+![](capturas/staticaRelayInterfaces.png)
+
+![](capturas/estaticaRelay.png)
+
+
+> Nota: comentamos todo excepto el rango de ips a proporcionar en el archivo de configuracion del servidor DHCP.
+
+Para terminar con la máquina relay, instalamos el servidor relay
+```bash
+apt install isc-dhcp-relay
+```
+Lo configuramos, primero, indicándole la network de la máquina cliente
+
+![](capturas/primeraPantallaRelay.png)
+
+Y después indicamos los nombres de las tarjetas de red
+
+![](capturas/segundaPantallaRelay.png)
+
+Configuramos la máquina servidor
+
+![](capturas/estaticaServidor.png)
+
+Y hacemos lo mismo con la máquina cliente
+
+st
+![](capturas/estiticaCliente.png)
+
+## Comprobación del servidor relay
+
+En la máquina servidor indicamos la ruta a añadir (network cliente) como la puerta por donde va a salir
+
+```bash
+ip route add 192.168.1.0/24 via 192.168.2.100
+```
+
+En la máquina cliente pedimos una ip, y vemos que ha recibido una ip dentro del rango de ips asignado en el servidor a través del servidor relay
+
+
+![](capturas/dhclient.png)
+
+
 
 ## Referencias
 
 * [Blog Jesus](https://jesusfernandeztoledo.com/configurar-servidor-dhcp-en-debian-ubuntu/)
 * [IES Mar de Cadiz](https://www.fpgenred.es/DHCP/index.html)
 * [DANITIC](https://danitic.wordpress.com/2018/10/24/diferencias-entre-nat-red-nat-adaptador-puente-internal-y-solo-anfitrion-en-virtualbox/)
-
+* [REDESZONE](https://www.redeszone.net/tutoriales/servidores/configurar-linux-comando-ip-iproute2-suite/)
