@@ -158,16 +158,20 @@ Finalmente, visualizamos que las tarjertas de red de la maquina cliente han reci
 
 ## Información sobre Red Interna, Red NAT y sus diferencias.
 
-Es red interna es un modo de configuración que nos permite crear una red local de dos o más máquinas virtuales, donde dos o más VM que tengamos configuradas se puedan comunicar entre sí sin problemas.
+La red interna es un modo de configuración que nos permite crear una red local de dos o más máquinas virtuales, donde dos o más VM que tengamos configuradas se puedan comunicar entre sí sin problemas.
 
 
 Una red NAT es una red que creará VirtualBox que permite compartir dicha red con varias máquinas virtuales de este sistema anfitrión. Además, proporciona una puerta de enlace con salida a Internet en la dirección de host número 1 de la red.
 
 Diferencias entre las dos redes:
-- la red interna solo permite ver maquinas virtuales que hemos dicho se conectan a ella,
-- la red interna la utilizaremos cuando deseemos que las maquinas este aisladas.
+- La red interna solo permite ver maquinas virtuales que hemos se conectan a ella.
+- La red interna la utilizaremos cuando deseemos que las maquinas este aisladas.
 - La red interna no tiene DHCP, asi que la configuración en las maquinas deberá de ser manual o una de ellas comportarse como DHCP.
 - La red NAT permite varias maquinas en la misma red. 
+- La red NAT conserva los esquemas y rangos de direccionamiento.
+- La red NAT conserva las direcciones a través de la multiplexación de aplicaciones a nivel de puertos.
+- La red NAT aumenta la flexibilidad de las conexiones a las redes públicas.
+- La red NAT permite ocultar las direcciones IPv4 privadas de los usuarios y otros dispositivos.
 
 ![](capturas/diferenciasRedes.png)
 
