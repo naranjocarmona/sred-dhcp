@@ -1,4 +1,4 @@
-# Pon la fecha
+#Tarea 1 18/10/2022
 
 # Información sobre MV y versión de SO
 ## Debian
